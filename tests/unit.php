@@ -14,6 +14,9 @@ foreach (['1234567890', '081234567', '+668123456789', '081abc5678'] as $input) {
 }
 check(valid_date('2026-10-15'), 'Valid date rejected');
 check(!valid_date('2026-02-30'), 'Invalid date accepted');
+check(thai_numeric_date('2026-10-16') === '16/10/2569', 'Thai date display failed');
+check(parse_thai_numeric_date('16/10/2569') === '2026-10-16', 'Thai date search conversion failed');
+check(parse_thai_numeric_date('30/02/2569') === null, 'Invalid Thai date accepted');
 check(valid_time('09:30') && !valid_time('25:00'), 'Time validation failed');
 check(e('<script>') === '&lt;script&gt;', 'HTML escaping failed');
 echo "Unit checks passed\n";

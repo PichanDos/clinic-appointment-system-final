@@ -4,5 +4,6 @@
 .list-card table{min-width:760px}
 .search-form{flex-wrap:wrap}.search-form>input[name="q"]{flex:1 1 220px;min-width:160px}.search-form .search-date{display:flex;align-items:center;gap:6px;color:#4b5670;font-size:11px;font-weight:700;white-space:nowrap}.search-form .search-date input{width:145px;margin:0}.search-form button{min-height:38px}
 @media(max-width:620px){.search-form>input[name="q"]{flex-basis:100%}.search-form .search-date{flex:1}.search-form .search-date input{flex:1;min-width:0}}
+.search-form .search-date input{width:160px}.search-error{color:#bf5360;font-size:11px;margin:-7px 0 13px}
 @media(max-width:620px){.sidebar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:20;width:100%;height:60px;padding:5px;flex-direction:row;align-items:center}.sidebar .brand,.sidebar .nav-label,.sidebar .sidebar-bottom{display:none}.sidebar nav{display:flex;width:100%;justify-content:space-around}.sidebar .nav-item,.sidebar .nav-item:not(.active){display:flex;flex-direction:column;gap:1px;font-size:10px;padding:3px 9px;margin:0}.sidebar .nav-item span{font-size:16px}.sidebar .nav-item.active:before{display:none}.content{padding-bottom:90px}}
 @media(max-width:620px){.metrics,.metrics.three{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{min-width:0}}

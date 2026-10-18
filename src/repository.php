@@ -9,10 +9,15 @@ function patient_list(PDO $db, string $search = '', string $birthDate = ''): arr
     $where = [];
     $params = [];
     if ($search !== '') {
-        $where[] = '(hn LIKE :hn OR CONCAT(first_name, " ", last_name) LIKE :name OR phone LIKE :phone)';
+        $searchFields = ['hn LIKE :hn', 'CONCAT(first_name, " ", last_name) LIKE :name'];
         $needle = '%' . $search . '%';
-        $phone = normalize_phone($search);
-        $params = ['hn' => $needle, 'name' => $needle, 'phone' => '%' . ($phone ?? preg_replace('/\D/', '', $search)) . '%'];
+        $params = ['hn' => $needle, 'name' => $needle];
+        $phone = normalize_phone($search) ?? preg_replace('/\D/', '', $search);
+        if ($phone !== '') {
+            $searchFields[] = 'phone LIKE :phone';
+            $params['phone'] = '%' . $phone . '%';
+        }
+        $where[] = '(' . implode(' OR ', $searchFields) . ')';
     }
     if ($birthDate !== '') {
         $where[] = 'birth_date = :birth_date';

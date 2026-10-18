@@ -22,6 +22,22 @@ function valid_date(string $date): bool
     return $parsed !== false && $parsed->format('Y-m-d') === $date;
 }
 
+function thai_numeric_date(string $date): string
+{
+    if (!valid_date($date)) return $date;
+    [$year, $month, $day] = explode('-', $date);
+    return $day . '/' . $month . '/' . ((int) $year + 543);
+}
+
+function parse_thai_numeric_date(string $date): ?string
+{
+    if (!preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', trim($date), $parts)) return null;
+    $year = (int) $parts[3] - 543;
+    if ($year < 1) return null;
+    $iso = sprintf('%04d-%02d-%02d', $year, (int) $parts[2], (int) $parts[1]);
+    return valid_date($iso) ? $iso : null;
+}
+
 function valid_time(string $time): bool
 {
     return (bool) preg_match('/^([01][0-9]|2[0-3]):[0-5][0-9]$/', $time);

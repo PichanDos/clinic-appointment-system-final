@@ -20,8 +20,10 @@ try {
     check(in_array($ids[0], array_column($birthMatches, 'id'), false) && !in_array($ids[1], array_column($birthMatches, 'id'), false), 'Birth date search failed');
     check(count(patient_list($db, $hn1, '1990-05-02')) === 1, 'Combined patient and birth date search failed');
     check(patient_list($db, $hn1, '1992-06-03') === [], 'Mismatched birth date accepted');
+    check(patient_list($db, 'ไม่มีชื่อนี้' . $suffix, '1990-05-02') === [], 'Name search ignored when birth date supplied');
     update_patient($db, ['id' => $ids[0], 'first_name' => 'แก้ไข', 'last_name' => 'หนึ่ง', 'phone' => '081-234-5678', 'birth_date' => '1990-05-02']);
     check(patient_by_id($db, $ids[0])['first_name'] === 'แก้ไข', 'Patient update failed');
+    check(count(patient_list($db, 'แก้ไข หนึ่ง', '1990-05-02')) === 1, 'Thai name and birth date search failed');
     $date = date('Y-m-d', strtotime('+14 days'));
     create_appointment($db, ['patient_id' => $ids[0], 'doctor_id' => 1, 'appointment_date' => $date, 'start_time' => '10:00', 'end_time' => '11:00']);
     $blocked = false;
