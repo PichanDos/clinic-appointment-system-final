@@ -16,6 +16,10 @@ try {
     $row2 = patient_list($db, $hn2)[0];
     $ids = [(int) $row1['id'], (int) $row2['id']];
     check($hn1 !== $hn2 && $row1['phone'] === '0812345678', 'HN or phone normalization failed');
+    $birthMatches = patient_list($db, '', '1990-05-02');
+    check(in_array($ids[0], array_column($birthMatches, 'id'), false) && !in_array($ids[1], array_column($birthMatches, 'id'), false), 'Birth date search failed');
+    check(count(patient_list($db, $hn1, '1990-05-02')) === 1, 'Combined patient and birth date search failed');
+    check(patient_list($db, $hn1, '1992-06-03') === [], 'Mismatched birth date accepted');
     update_patient($db, ['id' => $ids[0], 'first_name' => 'แก้ไข', 'last_name' => 'หนึ่ง', 'phone' => '081-234-5678', 'birth_date' => '1990-05-02']);
     check(patient_by_id($db, $ids[0])['first_name'] === 'แก้ไข', 'Patient update failed');
     $date = date('Y-m-d', strtotime('+14 days'));

@@ -56,7 +56,9 @@ if (!isset($databaseError)) {
     $todayArrived = count(array_filter($todayRows, fn($a) => $a['status'] === 'arrived'));
     if ($page === 'patients') {
         $search = trim((string) ($_GET['q'] ?? ''));
-        $patients = patient_list($pdo, $search);
+        $birthSearch = (string) ($_GET['birth_date'] ?? '');
+        if ($birthSearch !== '' && !valid_date($birthSearch)) $birthSearch = '';
+        $patients = patient_list($pdo, $search, $birthSearch);
         $editId = filter_var($_GET['edit'] ?? null, FILTER_VALIDATE_INT) ?: null;
         $editing = $editId ? patient_by_id($pdo, $editId) : null;
     }
@@ -114,7 +116,7 @@ $title = ['dashboard' => 'ภาพรวมวันนี้', 'patients' => '
             </form>
           </section>
           <section class="card list-card"><div class="card-heading space-between"><div><h2>รายชื่อผู้ป่วย</h2><p>แสดงสูงสุด 100 รายการล่าสุด</p></div><span class="count-pill"><?= count($patients) ?> รายการ</span></div>
-            <form class="search-form" method="get"><input type="hidden" name="page" value="patients"><input name="q" value="<?= e($search) ?>" placeholder="ค้นหาชื่อ, HN หรือเบอร์โทร" aria-label="ค้นหาผู้ป่วย"><button type="submit">ค้นหา</button></form>
+            <form class="search-form" method="get"><input type="hidden" name="page" value="patients"><input name="q" value="<?= e($search) ?>" placeholder="ค้นหาชื่อ, HN หรือเบอร์โทร" aria-label="ค้นหาผู้ป่วย"><label class="search-date">วันเกิด<input name="birth_date" type="date" value="<?= e($birthSearch) ?>" aria-label="ค้นหาตามวันเกิด"></label><button type="submit">ค้นหา</button></form>
             <div class="table-wrap"><table><thead><tr><th>ผู้ป่วย</th><th>เบอร์โทร</th><th>วันเกิด</th><th>วันลงทะเบียน</th><th></th></tr></thead><tbody>
               <?php foreach ($patients as $patient): ?><tr><td><strong><?= e($patient['first_name'] . ' ' . $patient['last_name']) ?></strong><span class="subline"><?= e($patient['hn']) ?></span></td><td><?= e($patient['phone']) ?></td><td><?= e(thai_date($patient['birth_date'])) ?></td><td><?= e(thai_date(substr($patient['registered_at'], 0, 10))) ?></td><td><a class="text-link" href="?page=patients&edit=<?= (int) $patient['id'] ?>">แก้ไข</a></td></tr><?php endforeach; ?>
               <?php if (!$patients): ?><tr><td colspan="5" class="empty-cell">ไม่พบผู้ป่วย</td></tr><?php endif; ?>

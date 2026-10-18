@@ -1,14 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
-function patient_list(PDO $db, string $search = ''): array
+function patient_list(PDO $db, string $search = '', string $birthDate = ''): array
 {
     $search = trim($search);
-    if ($search === '') return $db->query('SELECT * FROM patients ORDER BY registered_at DESC, id DESC LIMIT 100')->fetchAll();
-    $stmt = $db->prepare('SELECT * FROM patients WHERE hn LIKE :hn OR CONCAT(first_name, " ", last_name) LIKE :name OR phone LIKE :phone ORDER BY registered_at DESC, id DESC LIMIT 100');
-    $needle = '%' . $search . '%';
-    $phone = normalize_phone($search);
-    $stmt->execute(['hn' => $needle, 'name' => $needle, 'phone' => '%' . ($phone ?? preg_replace('/\D/', '', $search)) . '%']);
+    if ($search === '' && $birthDate === '') return $db->query('SELECT * FROM patients ORDER BY registered_at DESC, id DESC LIMIT 100')->fetchAll();
+    $where = [];
+    $params = [];
+    if ($search !== '') {
+        $where[] = '(hn LIKE :hn OR CONCAT(first_name, " ", last_name) LIKE :name OR phone LIKE :phone)';
+        $needle = '%' . $search . '%';
+        $phone = normalize_phone($search);
+        $params = ['hn' => $needle, 'name' => $needle, 'phone' => '%' . ($phone ?? preg_replace('/\D/', '', $search)) . '%'];
+    }
+    if ($birthDate !== '') {
+        $where[] = 'birth_date = :birth_date';
+        $params['birth_date'] = $birthDate;
+    }
+    $stmt = $db->prepare('SELECT * FROM patients WHERE ' . implode(' AND ', $where) . ' ORDER BY registered_at DESC, id DESC LIMIT 100');
+    $stmt->execute($params);
     return $stmt->fetchAll();
 }
 
@@ -96,7 +107,10 @@ function appointment_list(PDO $db, string $date, ?int $doctorId = null): array
 {
     $sql = 'SELECT a.*, p.hn, p.first_name, p.last_name, p.phone, d.name AS doctor_name, d.specialty FROM appointments a JOIN patients p ON p.id = a.patient_id JOIN doctors d ON d.id = a.doctor_id WHERE a.appointment_date = ?';
     $params = [$date];
-    if ($doctorId) { $sql .= ' AND a.doctor_id = ?'; $params[] = $doctorId; }
+    if ($doctorId) {
+        $sql .= ' AND a.doctor_id = ?';
+        $params[] = $doctorId;
+    }
     $sql .= ' ORDER BY a.start_time, a.id';
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
